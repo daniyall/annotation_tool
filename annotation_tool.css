@@ -1,0 +1,27 @@
+#waveform {
+    position: relative;
+}
+
+#waveform .progress {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.controls {
+    padding: 10px 0;
+    text-align: left;
+}
+
+.controls .btn {
+    margin: 10px;
+}
+
+.play_button {
+
+}
+
+.annotation_table {
+
+}

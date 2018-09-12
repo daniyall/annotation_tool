@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Annotation</title>
+ 	<link rel="stylesheet" href="annotation_tool.css">
+ 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.css">
+ 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css">
+ </head>
+<body>
+
+	<div id="annotation_div">
+	</div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/wavesurfer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/plugin/wavesurfer.regions.min.js"></script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+
+<script src="annotation_tool.js"></script>
+
+<script type="text/javascript">
+	var annotationTool;
+
+	var fields = [
+		{ name: "Start", type: "text", readOnly:true},
+		{ name: "End", type: "text", readOnly:true},
+        { name: "Label", type: "select", items: ["Cough", "Sneeze"]},
+        { name: "Source", type: "select", items: ["Patient", "2nd Person"]},
+        { type: "control" }
+    ]
+
+	$(document).ready( function () {
+	    annotationTool = new AnnotationTool("annotation_div", fields);
+		annotationTool.loadAudio("hlb.wav", [{"Start": 10, "End": 40, "Label": 0, "Source": 0}])
+	} );
+
+</script>
+
+</html>
