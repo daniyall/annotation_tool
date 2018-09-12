@@ -1,17 +1,44 @@
 class AnnotationTool {
 	constructor(rootElement, fields) {
 		this.rootElement = rootElement;
-		this.fields = fields;
+
+		var self = this;
+
+		this.fields = [
+			{ 
+				name: "Start", 
+				type: "text", readOnly: true, 
+				insertTemplate: function() {
+        			var input = this.__proto__.insertTemplate.call(this);
+          			input.val(self.wavesurfer.getCurrentTime())
+					return input;
+				}
+			},
+			{ 
+				name: "End", 
+				type: "text", 
+				readOnly: true,
+				insertTemplate: function() {
+        			var input = this.__proto__.insertTemplate.call(this);
+          			input.val(self.wavesurfer.getCurrentTime() + 1)
+					return input;
+				}
+			},
+		];
+
+		for (var i = 0; i < fields.length; i++) {
+			this.fields.push(fields[i]);
+		}
+
+		this.annotations = []
 
 		this.root_div = document.getElementById(this.rootElement)
-
-		this.rand_id = Math.floor(Math.random() * 10000)
 
 		this.init_wavesurfer()
 	}
 
 	init_wavesurfer() {
-		this.waveform_id = "Waveform-" + this.rand_id
+		this.waveform_id = "waveform"
 		this.controls_id = this.waveform_id + "-controls"
 
 		this.waveform_div = document.createElement('div');
@@ -42,7 +69,7 @@ class AnnotationTool {
 	}
 
 	init_table() {
-		this.datatable_id = "table-" + this.rand_id
+		this.datatable_id = "annotation_table"
 
 		this.datatable_div = document.createElement('div');
 		this.datatable_div.id = this.datatable_id
@@ -53,24 +80,37 @@ class AnnotationTool {
 		var self = this;
 		this.controller = create_controller(self)
 		$(document).ready( function () {
-		    $("#" + self.datatable_id).jsGrid({
+		    self.annotationTable = new jsGrid.Grid($("#" + self.datatable_id), {
 		    	controller: self.controller,
 		    	fields: self.fields,
 				autoload: true,
 				editing: true,
 				inserting: true,
-
-		    })
+		    });
 		} );
+
+
 	}
 
+	drawRegions() {
+		this.wavesurfer.clearRegions();
 
-	loadAudio(audio, regions=[]) {
+		for (var i = 0; i < this.annotations.length; i++) {
+			var newRegion = this._createRegion(this.annotations[i]);
+			this.wavesurfer.addRegion(newRegion);
+		}
+	}
+
+	loadAudio(audio, annotations=[]) {
 		this.wavesurfer.load(audio);
+
+		for (var i = 0; i < annotations.length; i++) {
+			this.annotations.push(annotations[i]);
+		}
 
 		var self = this;
 		this.wavesurfer.on("ready", function () {
-			self._set_regions(regions);
+			self.drawRegions();
 			self.init_table()
 		});
 	}
@@ -95,7 +135,7 @@ class AnnotationTool {
 		}
 	}
 
-	get annotations() {
+	get_annotations() {
 		var res = []
 		console.log("get")
 		for (var key in this.wavesurfer.regions.list) {
@@ -112,7 +152,6 @@ class AnnotationTool {
 				if (f == "Start" || f == "End") {
 					continue
 				}
-				console.log("FSF " + f + region[f])
 				annotation[f] = region[f]
 			}
 
@@ -124,29 +163,17 @@ class AnnotationTool {
 		return res
 	}
 
-	_add_region(annotation) {
+	_createRegion(annotation) {
 		var newRegion = {
 			start: annotation.Start,
 			end: annotation.End,
+			id:annotation.uid,
 			loop: true,
 			drag: false,
 			resize: true
 		}
 
-		for (var i = 0; i < this.fields.length; i++) {
-			var f = this.fields[i]["name"];
-			newRegion[f] = annotation[f]
-		}
-
-		this.wavesurfer.addRegion(newRegion);
-	}
-
-	_set_regions(annotations) {
-		this.wavesurfer.clearRegions();
-
-		for (var i = 0; i < annotations.length; i++) {
-			this._add_region(annotations[i])
-		}
+		return newRegion;
 	}
 }
 
